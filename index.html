@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EduConnect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Container que simula a tela cheia do celular */
+        .app-container {
+            width: 100%;
+            height: 100%;
+            max-width: 480px;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        @media (min-width: 481px) {
+            .app-container {
+                height: 90vh;
+                border-radius: 24px;
+                border: 8px solid #1e293b;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: #f8fafc;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* TELA 1: Bem-vindo */
+        #screen-welcome {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            padding: 32px;
+            text-align: center;
+        }
+
+        #screen-welcome h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        #screen-welcome p {
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .btn-primary {
+            background-color: #ffffff;
+            color: #2563eb;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        /* TELA 2: Cadastro / Login */
+        #screen-auth {
+            padding: 32px 24px;
+            justify-content: center;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .auth-card h2 {
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #2563eb;
+        }
+
+        /* TELA 3: App Principal (Abas) */
+        .app-header {
+            background: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .app-header h3 {
+            color: #2563eb;
+            font-size: 1.2rem;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 70px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Barra de Navegação Inferior */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            font-size: 0.8rem;
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        /* Feed de Postagens */
+        .feed-container {
+            padding: 16px;
+        }
+
+        .post-box {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #cbd5e1;
+            object-fit: cover;
+        }
+
+        .post-user-info h4 {
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+
+        .post-user-info span {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .post-content {
+            font-size: 0.95rem;
+            color: #334155;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 16px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn.liked {
+            color: #ef4444;
+        }
+
+        /* Criar Postagem */
+        .create-post {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .create-post textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            resize: none;
+            height: 80px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .create-post button {
+            margin-top: 8px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            float: right;
+        }
+
+        /* Perfil */
+        .profile-header {
+            background: white;
+            padding: 24px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .profile-header img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            margin-bottom: 12px;
+            border: 3px solid #2563eb;
+            cursor: pointer;
+        }
+
+        .profile-header h2 {
+            color: #1e293b;
+            font-size: 1.2rem;
+        }
+
+        .profile-header p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        /* Conversas / Chat */
+        .chat-list {
+            padding: 16px;
+        }
+
+        .chat-item {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .chat-info h4 {
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+
+        .chat-info p {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- TELA 1: BOAS-VINDAS -->
+        <div id="screen-welcome" class="screen active">
+            <h1>EduConnect</h1>
+            <p>Bem-vindo ao EduConnect! A rede de comunicação definitiva para conectar professores de todo o Brasil, trocar experiências e colaborar.</p>
+            <button class="btn-primary" onclick="goToAuth()">Começar</button>
+        </div>
+
+        <!-- TELA 2: CADASTRO / LOGIN -->
+        <div id="screen-auth" class="screen">
+            <div class="auth-card">
+                <h2>Identificação do Professor</h2>
+                <div class="input-group">
+                    <label>Nome de Usuário</label>
+                    <input type="text" id="reg-name" placeholder="Ex: Prof. Carlos Silva">
+                </div>
+                <div class="input-group">
+                    <label>E-mail Institucional</label>
+                    <input type="email" id="reg-email" placeholder="professor@escola.com">
+                </div>
+                <div class="input-group">
+                    <label>Senha de Preferência</label>
+                    <input type="password" id="reg-pass" placeholder="Sua senha secreta">
+                </div>
+                <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="saveAndEnterApp()">Salvar e Entrar</button>
+            </div>
+        </div>
+
+        <!-- TELA 3: APLICATIVO PRINCIPAL -->
+        <div id="screen-main" class="screen" style="position: relative;">
+            <div class="app-header">
+                <h3 id="app-title">EduConnect Feed</h3>
+                <span id="header-username" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Prof.</span>
+            </div>
+
+            <!-- ABA 1: FEED DE POSTAGENS -->
+            <div id="tab-feed" class="tab-content active">
+                <div class="feed-container">
+                    <div class="create-post">
+                        <textarea id="post-text" placeholder="Compartilhe uma ideia, atividade ou dúvida com outros professores..."></textarea>
+                        <button onclick="createPost()">Publicar</button>
+                        <div style="clear: both;"></div>
+                    </div>
+                    
+                    <div id="posts-list">
+                        <!-- Postagem Modelo 1 -->
+                        <div class="post-box">
+                            <div class="post-header">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="avatar" alt="Avatar">
+                                <div class="post-user-info">
+                                    <h4>Profª Ana Souza</h4>
+                                    <span>Matemática • Há 15 min</span>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                Pessoal, consegui um resultado excelente usando gamificação com tabuada na turma do 5º ano. Alguém mais utiliza essa metodologia?
+                            </div>
+                            <div class="post-actions">
+                                <button class="action-btn" onclick="toggleLike(this)">❤️ <span>14</span></button>
+                                <button class="action-btn">💬 <span>3</span></button>
+                            </div>
+                        </div>
+
+                        <!-- Postagem Modelo 2 -->
+                        <div class="post-box">
+                            <div class="post-header">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="avatar" alt="Avatar">
+                                <div class="post-user-info">
+                                    <h4>Prof. Marcos Lima</h4>
+                                    <span>História • Há 1 hora</span>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                Compartilhando um link com mapas históricos interativos para as aulas de Idade Média. Muito bom para engajar os alunos!
+                            </div>
+                            <div class="post-actions">
+                                <button class="action-btn" onclick="toggleLike(this)">❤️ <span>28</span></button>
+                                <button class="action-btn">💬 <span>7</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 2: MENSAGENS / CONVERSAS -->
+            <div id="tab-chat" class="tab-content">
+                <div class="chat-list">
+                    <h3 style="margin-bottom: 12px; color: #1e293b; font-size: 1rem;">Conversas com Colegas</h3>
+                    <div class="chat-item" onclick="alert('Abrindo chat com Profª Ana Souza...')">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="avatar" alt="Avatar">
+                        <div class="chat-info">
+                            <h4>Profª Ana Souza</h4>
+                            <p>Combinado sobre a feira de ciências!</p>
+                        </div>
+                    </div>
+                    <div class="chat-item" onclick="alert('Abrindo chat com Prof. Marcos Lima...')">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="avatar" alt="Avatar">
+                        <div class="chat-info">
+                            <h4>Prof. Marcos Lima</h4>
+                            <p>Obrigado pelas dicas de história!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 3: PERFIL DO PROFESSOR -->
+            <div id="tab-profile" class="tab-content">
+                <div class="profile-header">
+                    <img id="profile-avatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150" alt="Foto de Perfil" onclick="changeAvatar()">
+                    <h2 id="profile-name-display">Nome do Professor</h2>
+                    <p id="profile-email-display">email@escola.com</p>
+                    <button class="btn-primary" style="font-size: 0.85rem; padding: 8px 16px;" onclick="editProfile()">Editar Perfil</button>
+                </div>
+                <div style="padding: 16px;">
+                    <h4 style="color: #1e293b; margin-bottom: 10px;">Minhas Postagens</h4>
+                    <div id="my-posts-list">
+                        <p style="color: #64748b; font-size: 0.9rem;">Você ainda não fez nenhuma postagem hoje.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAVEGAÇÃO INFERIOR -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" onclick="switchTab('feed', this)">
+                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    Feed
+                </button>
+                <button class="nav-item" onclick="switchTab('chat', this)">
+                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                    Conversas
+                </button>
+                <button class="nav-item" onclick="switchTab('profile', this)">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    Perfil
+                </button>
+            </nav>
+        </div>
+
+    </div>
+
+    <script>
+        let currentUser = {
+            name: "Professor(a)",
+            email: "professor@educonnect.com",
+            avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"
+        };
+
+        function goToAuth() {
+            document.getElementById('screen-welcome').classList.remove('active');
+            document.getElementById('screen-auth').classList.add('active');
+        }
+
+        function saveAndEnterApp() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            
+            if(name.trim() !== "") {
+                currentUser.name = name;
+                if(email.trim() !== "") currentUser.email = email;
+            }
+
+            document.getElementById('header-username').innerText = currentUser.name;
+            document.getElementById('profile-name-display').innerText = currentUser.name;
+            document.getElementById('profile-email-display').innerText = currentUser.email;
+
+            document.getElementById('screen-auth').classList.remove('active');
+            document.getElementById('screen-main').classList.add('active');
+        }
+
+        function switchTab(tabName, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+
+            document.getElementById('tab-' + tabName).classList.add('active');
+            btnElement.classList.add('active');
+
+            const titles = { feed: 'EduConnect Feed', chat: 'Mensagens', profile: 'Meu Perfil' };
+            document.getElementById('app-title').innerText = titles[tabName];
+        }
+
+        function toggleLike(button) {
+            button.classList.toggle('liked');
+            let span = button.querySelector('span');
+            let count = parseInt(span.innerText);
+            if (button.classList.contains('liked')) {
+                span.innerText = count + 1;
+            } else {
+                span.innerText = count - 1;
+            }
+        }
+
+        function createPost() {
+            const text = document.getElementById('post-text').value;
+            if(text.trim() === "") return;
+
+            const postsList = document.getElementById('posts-list');
+            const newPostHTML = `
+                <div class="post-box">
+                    <div class="post-header">
+                        <img src="${currentUser.avatar}" class="avatar" alt="Avatar">
+                        <div class="post-user-info">
+                            <h4>${currentUser.name}</h4>
+                            <span>Agora mesmo</span>
+                        </div>
+                    </div>
+                    <div class="post-content">${text}</div>
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="toggleLike(this)">❤️ <span>0</span></button>
+                        <button class="action-btn">💬 <span>0</span></button>
+                    </div>
+                </div>
+            `;
+            postsList.innerHTML = newPostHTML + postsList.innerHTML;
+            document.getElementById('post-text').value = "";
+        }
+
+        function changeAvatar() {
+            const newUrl = prompt("Cole o link da sua nova foto de perfil (URL):", currentUser.avatar);
+            if(newUrl) {
+                currentUser.avatar = newUrl;
+                document.getElementById('profile-avatar').src = newUrl;
+                alert("Foto de perfil alterada com sucesso!");
+            }
+        }
+
+        function editProfile() {
+            const newName = prompt("Alterar nome de usuário:", currentUser.name);
+            if(newName) {
+                currentUser.name = newName;
+                document.getElementById('profile-name-display').innerText = newName;
+                document.getElementById('header-username').innerText = newName;
+                alert("Nome atualizado com sucesso!");
+            }
+        }
+    </script>
+</body>
+</html>
